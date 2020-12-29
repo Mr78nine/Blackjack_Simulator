@@ -3,6 +3,7 @@ from libs.playBj import State
 from yaml import load, FullLoader
 from time import time
 
+
 cfg1 = open("libs/ConfigureBJ.yaml", 'r')
 cfg2 = open("libs/Basic_Strategy.yaml", 'r')
 cfg3 = open("libs/Profbj_benchmark.yaml", 'r')
