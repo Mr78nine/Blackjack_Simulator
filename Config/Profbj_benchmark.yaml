@@ -40,12 +40,12 @@
 Strategy: &df_strat
     count: "Hi-Lo"
     indices : "I18, Fab4"
-    bankroll : 1000
+    bankroll : 10000
     betSpread : "1-8"
 
 Rules: &df_casino_sl
-    deckNumber : 2
-    dealer17 : "H17"
+    deckNumber : 6
+    dealer17 : "S17"
     bjPays: 1.5
     surrender : "No"
     insurancePays : 2
@@ -53,7 +53,7 @@ Rules: &df_casino_sl
     maxBet : 100 #50 units
     deckPen : 1 #Play until 0.1 deck left (terrible penetration)
     #Split aces
-    resplitAces : 4
+    resplitAces : 2 #Aces can't be resplit (2 hands total for aces)
     #Double-down rules
     whenDouble: "Original Two"
     das : false
