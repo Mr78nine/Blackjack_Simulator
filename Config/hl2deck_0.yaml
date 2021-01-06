@@ -40,23 +40,23 @@
 Strategy: &df_strat
     count: "Hi-Lo"
     indices : "I18, Fab4"
-    bankroll : 100000 #Just finding ev, not calculating ror or anything like that...
-    betSpread : "1-10" #Betting unit: $10
+    bankroll : 1000
+    betSpread : "1-8"
 
 Rules: &df_casino_sl
-    deckNumber : 6
-    dealer17 : "S17"
+    deckNumber : 2
+    dealer17 : "H17"
     bjPays: 1.5
     surrender : "No"
     insurancePays : 2
     minBet : 1 #1 unit
     maxBet : 100 #50 units
-    deckPen : 1 #Play until 1 deck left
+    deckPen : 1 #Play until 0.25 of a deck left
     #Split aces
     resplitAces : 4
     #Double-down rules
     whenDouble: "Original Two"
-    das : False
+    das : false
 
 Strategy_Table: &tb #Hi-Low, H17, double-deck, NDas, I18, Ns
   #For indices, +n means at tc of +n or higher. -n means at tc of -n or lower
