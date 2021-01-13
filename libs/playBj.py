@@ -1,3 +1,5 @@
+import sys,os
+sys.path.append(os.path.dirname(__file__))
 from yaml import load, FullLoader
 import pbjHelpers as ph
 
@@ -273,20 +275,7 @@ class State:
                 self.deal_card(self.dealerHand)
 
     def place_bets_profbj(self):
-
-        #1 unit is $10
-        tcount = self.get_true_count()
-        if tcount >= 4:
-            bet = 10
-        elif tcount < 4 and tcount >= 3:
-            bet = 7.5
-        elif tcount < 3 and tcount >= 2:
-            bet = 5
-        elif tcount < 2 and tcount >=0:
-            bet = 2.5
-        else:
-            bet = 1
-
+        bet = 1
         self.playerBankroll -= bet
         self.playerBets.append(bet)
     def place_bets(self):
@@ -344,6 +333,7 @@ class State:
     def play_rounds(self, numRounds):
 
         for i in range(numRounds):
+
             self.clear_table()
             #Check if we should shuffle (grab a new deck)
             if (self.deckPen * 52) >= len(self.shoe.cards):

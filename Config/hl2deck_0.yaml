@@ -51,7 +51,7 @@ Rules: &df_casino_sl
     insurancePays : 2
     minBet : 1 #1 unit
     maxBet : 100 #50 units
-    deckPen : 1 #Play until 0.25 of a deck left
+    deckPen : 0.5 #Play until 0.25 of a deck left
     #Split aces
     resplitAces : 4
     #Double-down rules

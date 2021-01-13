@@ -40,7 +40,7 @@
 Strategy: &df_strat
     count: "Hi-Lo"
     indices : "I18, Fab4"
-    bankroll : 1000
+    bankroll : 1000000000 #High for testing
     betSpread : "1"
 
 Rules: &df_casino_sl
@@ -51,7 +51,7 @@ Rules: &df_casino_sl
     insurancePays : 2
     minBet : 1 #1 unit
     maxBet : 100 #50 units
-    deckPen : 0.25 #Play until 0.25 of deck left
+    deckPen : 0.5 #Play until 0.25 of deck left
     #Split aces
     resplitAces : 4
     #Double-down rules
