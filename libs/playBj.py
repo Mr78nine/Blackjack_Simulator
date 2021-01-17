@@ -12,7 +12,9 @@ class State:
         self.config = cfg
 
         # Init strategy vars
-        self.betSpread = self.config["Strategy"]["betSpread"]
+        self.betSpread = self.config["Strategy"]["betSpread"] #Getting a dictionary here
+        self.bsBottomRange = list(self.betSpread.items())[0][0]
+        self.bsTopRange = list(self.betSpread.items())[-1][0]
         # Init player vars
         self.runningCount = 0
         self.playerHands = [[]]
@@ -79,6 +81,7 @@ class State:
             return True
         else:
             return False
+
     # Assume we didn't bust
     def get_formatted_hand(self,hand, forceHardTotal=False):
         if len(hand) == 1:
@@ -95,19 +98,27 @@ class State:
                 else:
                     return ("{}-{}".format(self.get_cardVal(hand[0]), self.get_cardVal(hand[1])))
 
-        total = self.get_hand_total(hand)
+        total = 0
         aceCount = 0
 
         for card in hand:
-            if self.get_cardVal(card) == 11:
+            val = self.get_cardVal(card)
+            if val == 11:
                 aceCount += 1
+            total += val #Get hard total first, then convert aces if possible
 
-        if aceCount == 0:
+        if total == 21:
             return total
-        elif total-11 > 1:
-            return f"A-{total-11}"
-        else:
+
+        while aceCount > 0 and total > 21:
+            total -= 10
+            aceCount -= 1
+
+        if aceCount == 0 or total == 12: #No such thing as A-1 you goddamn animal
             return total
+
+        else: #Ace count should never exceed 1 in soft totals
+            return f"A-{total - 11}"
 
 
 
@@ -181,8 +192,9 @@ class State:
 
                 # If we have split aces, we must stand:
                 if len(self.playerHands) > 1 and self.get_cardVal(self.playerHands[handIndex][0]) == 11:
-                    self.playerState = "stand"
-                    continue
+                    if not (len(self.playerHands) < self.resplitAces) or self.playerState != "split":
+                        self.playerState = "stand"
+                        continue
 
 
                 # If we busted:
@@ -195,10 +207,7 @@ class State:
 
                 # If we wanna hit:
                 if self.playerState == "hit":
-                    card = self.shoe.rm_card()
-                    self.playerHands[handIndex].append(card)  # Go to the hand that wants the card, and give the card to it
-                    # Now, update the running count
-                    self.update_running_count(card)
+                    self.deal_card(self.playerHands[handIndex])
 
 
                 # If we wanna double
@@ -210,6 +219,7 @@ class State:
                             self.playerBankroll -= self.playerBets[handIndex]
                             self.playerBets[handIndex] *= 2  # Bet index corresponds to handIndex - i.e. for hands[2], its bet is at bets[2]
                             self.deal_card(self.playerHands[handIndex])
+                            continue
 
                 # todo: Rest of double cases like only double 9-11, 9-10, etc. (def can_double)
 
@@ -274,33 +284,28 @@ class State:
             while self.get_hand_total(self.dealerHand) < 17 or self.is_soft17(self.dealerHand):
                 self.deal_card(self.dealerHand)
 
-    def place_bets_profbj(self):
-        bet = 1
-        self.playerBankroll -= bet
-        self.playerBets.append(bet)
     def place_bets(self):
 
-        strategy = self.betSpread.split("-")
+        tcount = self.get_true_count()
+        key = tcount
 
-        bet = 0
-        if len(strategy) == 1: #Flat bets
-            bet = int(strategy[0])
+        if key < self.bsBottomRange:
+            key = self.bsBottomRange
+        elif key > self.bsTopRange:
+            key = self.bsTopRange
         else:
-            minBet = int(strategy[0])
-            maxBet = int(strategy[1])
+            key = round(key)
 
-            tcount = self.get_true_count()
-            bet = int (1.2 * tcount)
-
-            if bet < minBet:
-                bet = minBet
-            elif bet > maxBet:
-                bet = maxBet
+        bet = self.betSpread[key]
 
         self.playerBankroll -= bet
         self.playerBets.append(bet)
+
     #Deal card
     def deal_card(self, hand, updateRC=True):
+        if (self.deckPen * 52) >= len(self.shoe.cards):
+            self.shuffle()
+
         card = self.shoe.rm_card()
         if updateRC:
             self.update_running_count(card)
@@ -335,15 +340,13 @@ class State:
         for i in range(numRounds):
 
             self.clear_table()
-            #Check if we should shuffle (grab a new deck)
-            if (self.deckPen * 52) >= len(self.shoe.cards):
-                self.shuffle()
+
 
             if(self.playerBankroll < self.minBet):
                 print("Bankrupt!")
                 return i
 
-            self.place_bets_profbj() #todo: Change to accept any betting strategy
+            self.place_bets()
             self.deal_hands()
 
             # Check for player natural

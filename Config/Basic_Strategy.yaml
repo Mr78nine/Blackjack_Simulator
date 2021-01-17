@@ -41,7 +41,14 @@ Strategy: &df_strat
     count: "Hi-Lo"
     indices : "I18, Fab4"
     bankroll : 1000000000 #High for testing
-    betSpread : "1"
+    betSpread :
+      0 : 1
+      1 : 1
+      2 : 1
+      3 : 1
+      4 : 1
+      5 : 1
+      6 : 1
 
 Rules: &df_casino_sl
     deckNumber : 2
