@@ -38,7 +38,6 @@ class State:
 
         # Init dealer vars
         self.dealerHand = []
-        self.dealerAction = ""
 
         #Init meta vars
         self.wins = 0
@@ -50,6 +49,7 @@ class State:
     def get_hand_total(self, hand):
         total = 0
         saveIt = 0
+
         for card in hand:
             val = self.get_cardVal(card)
             if val == 11:
@@ -57,8 +57,7 @@ class State:
             total += val
         # Now, try to save it if we have aces!
         while total > 21 and saveIt > 0:
-            if saveIt == 0:
-                break
+
             total -= 10
             saveIt -= 1
         return total
@@ -186,19 +185,24 @@ class State:
     def play_player(self, handIndex):
         stop = False
         while not stop:
-            while self.playerState != "bust" and self.playerState != "stand" and self.playerState != "double":
+            while self.playerState != "bust" and self.playerState != "stand" and self.playerState != "double" and self.playerState != "double-stand":
 
                 self.playerState = self.get_player_state(playerHand=self.playerHands[handIndex], tcount=self.get_true_count())
 
                 # If we have split aces, we must stand:
                 if len(self.playerHands) > 1 and self.get_cardVal(self.playerHands[handIndex][0]) == 11:
-                    if not (len(self.playerHands) < self.resplitAces) or self.playerState != "split":
+                    if len(self.playerHands) >= self.resplitAces or self.playerState != "split":
                         self.playerState = "stand"
                         continue
 
 
                 # If we busted:
-                if self.playerState == "bust" or self.playerState == "stand":
+                if self.playerState == "bust":
+                    del self.playerBets[handIndex]
+                    del self.playerHands[handIndex]
+                    continue
+
+                if self.playerState == "stand":
                     continue
 
                 # If we wanna surrender: todo
@@ -232,7 +236,7 @@ class State:
                             self.playerBankroll -= self.playerBets[handIndex]
                             self.playerBets[handIndex] *= 2
                             self.deal_card(self.playerHands[handIndex])
-
+                            continue
                     # todo: Rest of double cases (def can_double)
 
                 elif self.playerState == "split":
@@ -272,7 +276,7 @@ class State:
         #If player has no non-bust hands, don't play
         busted = True
         for hand in self.playerHands:
-            if self.get_hand_total(hand) < 21:
+            if self.get_hand_total(hand) <= 21:
                 busted = False
         if busted:
             return
@@ -399,18 +403,3 @@ class State:
 
 
 
-
-if __name__ == "__main__": #For testing
-
-    file = open("ConfigureBJ.yaml", "r")
-    cfg = load(file, Loader=FullLoader)
-    state = State(cfg)
-    file.close()
-    #Let's play a few practice rounds
-
-    for count in range(1000000):
-        state.play_rounds()
-        print(count, f": {state.playerBankroll}")
-        if (state.playerBankroll < state.minBet) :
-            state.playerBankroll = 1000
-            print("Bankrupt - resetting")
