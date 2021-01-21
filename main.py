@@ -1,40 +1,66 @@
-import os
+from sys import argv
 from libs.playBj import State
 from yaml import load, FullLoader
 from time import time
+import multiprocessing
 
+try:
+    handNum = int(argv[1])
+    iterations = int(argv[2])
+except AssertionError:
+    raise AssertionError("Please call the program with two arguments: handNum and iterations (handNum = "
+          "number of hands per worker, iterations is how many times each worker plays)")
 
-cfg1 = open("libs/ConfigureBJ.yaml", 'r')
-cfg2 = open("libs/Basic_Strategy.yaml", 'r')
-cfg3 = open("libs/Profbj_benchmark.yaml", 'r')
+cfg1 = open("Config/Basic_Strategy.yaml", 'r')
+cfg2 = open("Config/hl2deck_0.yaml", 'r')
+cfg3 = open("Config/Profbj_benchmark.yaml", 'r')
 config1 = load(cfg1, Loader=FullLoader)
 config2 = load(cfg2, Loader=FullLoader)
 config3 = load(cfg3, Loader=FullLoader)
 
-handNum = 100000
-iterations = 6000
-wins = []
 
-#Need to find winrate per 100 hands
-bankruptCount = 0
-
-for i in range(iterations):
-    print(i)
-    try:
+def task(config):
+    wins = []
+    for i in range(iterations):
         table = State(config3)
 
         start = table.playerBankroll
         bankruptAt = table.play_rounds(handNum)
         end = table.playerBankroll
 
-        wins.append(end-start)
-    except KeyboardInterrupt:
-        print("Ending sim early due to Keyboard Interrupt")
-        iterations = i
-        break
-print(f"Average win per {handNum} hands after {iterations} iterations: ${10 * (sum(wins)/len(wins))}")
-print(f"Wins list ({len(wins)} entries): {wins}")
+        wins.append(end - start)
+    print("Worker finished!")
+    return wins
 
+
+#todo: House edge is, I think, units per 100 hands. If you win 1 unit per 100 hands on avg, then 1%
+#todo: So find avg of the wins list, divide by len of wins list, then normalize it to per 100 hands
+
+if __name__ == "__main__":
+    ccount = multiprocessing.cpu_count()
+    wkrCount = int(input(f"How many workers do you want (1-{ccount})? "))
+    print(f"Playing with {wkrCount} workers, each assigned to play {handNum} hands {iterations} times, for a total of "
+          f"{(wkrCount * handNum * iterations):,} hands played ")
+
+    with multiprocessing.Pool(processes=ccount) as pool:
+        multiprocessing.freeze_support()
+        task_arg_list = [config1 for i in range(wkrCount)]
+
+        start = time()
+        rawResults = pool.map(task, tuple(task_arg_list))
+        end = time()
+
+        print(rawResults)
+        wins = [item for sublist in rawResults for item in sublist]
+
+        normalizer = handNum / 100 #Normalize to 100 hands
+        avgWin = sum(wins) / (len(wins) * normalizer)
+        print(f"Done! Took {(end-start)/60} minutes. Win {avgWin} units per 100 hands on average")
+
+        file = open("Test_Results/profbj", "w")
+        file.write(f"Done! Took {(end-start)/60} minutes. Win {avgWin} units per 100 hands on average\n"
+                   f"{(wkrCount * handNum * iterations):,} hands played\n"
+                   f"results: {wins}")
 
 #
 # for i in range(1000):
