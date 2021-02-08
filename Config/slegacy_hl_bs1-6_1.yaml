@@ -1,0 +1,522 @@
+%YAML 1.2
+---
+##YAML: YAML Ain't Markup Language!
+## !!: Explicitly mention datatype of value (explicit conversions
+##
+#
+##Multi-line string mapping to root node "example"
+#example: &ex >
+#  The summer plum tree
+#  Does not care what lies ahead
+#  Refrigerator
+#simulation: &simAnchor
+#   within: "a simulation"
+#   without:
+#    a_glitch: "in the matrix"
+#    choosing: "the chosen one"
+#
+#anotherMap: &AMap
+#  m1 :  true
+#  m2 : >
+#    Sugar plums and baby teeth
+#    it's all to see too much!!
+#  m3 : henlo
+#ILove: &Ilv
+#  #Anchors are de-referenced by aliases - & and *, respectively
+#  - *simAnchor
+#  - &name Kaila
+#  - You
+#  - can
+#  - say
+#  - that
+#  - I
+#  - love
+#  - *name
+#
+#sim:
+#  <<: [*simAnchor, *AMap]
+#  bubbles: true
+
+Strategy: &df_strat
+    count: "Hi-Lo"
+    indices : "I18, Fab4"
+    bankroll : 800
+    betSpread :
+      0 : 1
+      1 : 1
+      2 : 2
+      3 : 4
+      4 : 6
+
+
+Rules: &df_casino_sl
+    deckNumber : 2
+    dealer17 : "H17"
+    bjPays: 1.5
+    surrender : "No"
+    insurancePays : 2
+    minBet : 1 #1 unit
+    maxBet : 100 #50 units
+    deckPen : 0.5 #Play until 0.25 of a deck left
+    #Split aces
+    resplitAces : 4
+    #Double-down rules
+    whenDouble: "Original Two"
+    das : false
+
+Strategy_Table: &tb #Hi-Low, H17, double-deck, NDas, I18, Ns
+  #For indices, +n means at tc of +n or higher. -n means at tc of -n or lower
+  #Format is "Action atIndex ActionIfNotIndex"
+  insurance: "+2.4"
+  #Player Hand
+  #---------------Pairs---------------------------#
+  A-A:
+    #Dealer upcard
+    2 : "split"
+    3 : "split"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "split"
+    8 : "split"
+    9 : "split"
+    10 : "split"
+    A : "split"
+  10-10:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "split +6 stand"
+    5 : "split +5 stand"
+    6 : "split +4 stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+  9-9:
+    #Dealer upcard
+    2 : "split"
+    3 : "split"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "stand"
+    8 : "split"
+    9 : "split"
+    10 : "stand"
+    A : "stand"
+  8-8:
+    #Dealer upcard
+    2 : "split"
+    3 : "split"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "split"
+    8 : "split"
+    9 : "split"
+    10 : "split"
+    A : "split"
+  7-7:
+    #Dealer upcard
+    2 : "split"
+    3 : "split"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "split"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  6-6:
+    #Dealer upcard
+    2 : "hit"
+    3 : "split"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  5-5:
+    #Dealer upcard
+    2 : "double"
+    3 : "double"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "double"
+    8 : "double"
+    9 : "double"
+    10 : "double +4 hit"
+    A : "double +3 hit"
+  4-4:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  3-3:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "split"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  2-2:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "split"
+    5 : "split"
+    6 : "split"
+    7 : "split"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+
+#--------------Soft totals------------------#
+  A-9:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+  A-8:
+    #Dealer up-card
+    2: "stand"
+    3: "stand"
+    4: "stand"
+    5: "stand"
+    6: "double"
+    7: "stand"
+    8: "stand"
+    9: "stand"
+    10: "stand"
+    A: "stand"
+  A-7:
+    #Dealer up-card
+    2: "double-stand"
+    3: "double-stand"
+    4: "double-stand"
+    5: "double-stand"
+    6: "double-stand"
+    7: "stand"
+    8: "stand"
+    9: "hit"
+    10: "hit"
+    A: "hit"
+  A-6:
+    #Dealer up-card
+    2: "hit"
+    3: "double"
+    4: "double"
+    5: "double"
+    6: "double"
+    7: "hit"
+    8: "hit"
+    9: "hit"
+    10: "hit"
+    A: "hit"
+  A-5:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  A-4:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  A-3:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "double"
+    6 : "double"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  A-2:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "double"
+    6 : "double"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+#------------------Hard Totals---------------------_#
+
+  20:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+
+  19:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+  18:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+  17:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "stand"
+    8 : "stand"
+    9 : "stand"
+    10 : "stand"
+    A : "stand"
+
+  16:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "hit"
+    8 : "hit"
+    9 : "stand +5 hit"
+    10 : "stand +0 hit"
+    A : "hit"
+  15:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "stand +4 hit"
+    A : "hit"
+  14:
+    #Dealer upcard
+    2 : "stand"
+    3 : "stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  13:
+    #Dealer upcard
+    2 : "hit -0 stand"
+    3 : "hit -2 stand"
+    4 : "stand"
+    5 : "stand"
+    6 : "stand"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  12:
+    #Dealer upcard
+    2 : "stand +4 hit"
+    3 : "stand +3 hit"
+    4 : "hit -0 stand"
+    5 : "hit -1 stand"
+    6 : "hit -3 stand"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  11:
+    #Dealer upcard
+    2 : "double"
+    3 : "double"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "double"
+    8 : "double"
+    9 : "double"
+    10 : "double"
+    A : "hit -1 double"
+  10:
+    #Dealer upcard
+    2 : "double"
+    3 : "double"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "double"
+    8 : "double"
+    9 : "double"
+    10 : "double +4 hit"
+    A : "double +3 hit"
+  9:
+    #Dealer upcard
+    2 : "double +1 hit"
+    3 : "double"
+    4 : "double"
+    5 : "double"
+    6 : "double"
+    7 : "double +4 hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  8:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  7:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  6:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  5:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  4:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  3:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
+  2:
+    #Dealer upcard
+    2 : "hit"
+    3 : "hit"
+    4 : "hit"
+    5 : "hit"
+    6 : "hit"
+    7 : "hit"
+    8 : "hit"
+    9 : "hit"
+    10 : "hit"
+    A : "hit"
